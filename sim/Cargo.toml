@@ -1,0 +1,9 @@
+[package]
+name = "sim"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+macroquad = "0.4.13"
+hole = { path =  "../hole" }
+colors-transform = "0.2.11"
