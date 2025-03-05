@@ -1,13 +1,14 @@
 use crate::ball::*;
 use crate::wall::*;
+use crate::constants::*;
 
 use std::fs::File;
+use std::io::Write;
+use std::io::LineWriter;
 use std::io::{self, BufRead};
 use std::path::Path;
 use macroquad::prelude::Vec2;
 
-pub const BALL_RADIUS: f32 = 5.0;
-pub const CUP_RADIUS: f32 = 8.0;
 const UNSET_RADIUS: f32 = 0.0;
 
 pub struct Hole {
@@ -71,6 +72,17 @@ impl Hole {
             cup: cup,
             walls: walls
         }
+    }
+
+    pub fn save_to_file(&self, filename: String) -> Result<(), Box<dyn std::error::Error>> {
+        let file = File::create(filename)?;
+        let mut file = LineWriter::new(file);
+        file.write_all(("ball ".to_owned() + &self.ball.to_string() + "\n").as_bytes())?;
+        file.write_all(("cup ".to_owned() + &self.cup.to_string() + "\n").as_bytes())?;
+        for w in self.walls.iter() {
+            file.write_all((w.to_string() + "\n").as_bytes())?;
+        }
+        Ok(())
     }
 }
 

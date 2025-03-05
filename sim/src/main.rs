@@ -5,14 +5,15 @@ use std::thread;
 use std::thread::JoinHandle;
 use hole::ball::Ball;
 use hole::wall::Wall;
+use hole::constants;
 
-const SCREEN_SIZE: f32 = 600.0;
 const FARTHEST_DISTANCE: f32 = 600.0;
 const MAX_HUE: f32 = 300.0;
 const SATURATION: f32 = 100.0;
 const LIGHTNESS: f32 = 50.0;
 const MAX_RGB_VALUE: f32 = 255.0;
-const NUM_THREADS: usize = SCREEN_SIZE as usize / 100;
+const ALPHA: f32 = 1.0;
+const NUM_THREADS: usize = constants::SCREEN_SIZE as usize / 100;
 
 #[macroquad::main("Simulate")]
 async fn main() {
@@ -28,11 +29,11 @@ async fn main() {
 
     let mut threads: Vec<JoinHandle<Vec<f32>>> = vec!();
 
-    let y_step: f32 = SCREEN_SIZE / NUM_THREADS as f32;
+    let y_step: f32 = constants::SCREEN_SIZE / NUM_THREADS as f32;
 
-    for i in 0..NUM_THREADS {
-        let start_y = i as f32 * y_step;
-        let stop_y = (i + 1) as f32 * y_step;
+    for thread in 0..NUM_THREADS {
+        let start_y = thread as f32 * y_step;
+        let stop_y = (thread + 1) as f32 * y_step;
 
         let mut walls: Vec<Wall> = vec!();
         for i in 0..hole.walls.len() {
@@ -44,30 +45,28 @@ async fn main() {
             let mut y: f32 = start_y;
             let mut i: usize = 0;
 
+            // crazy math
             let rows: f32 = (stop_y - start_y) / step as f32;
-            let putts: usize = ((SCREEN_SIZE * rows) / step as f32) as usize;
+            let putts: usize = ((constants::SCREEN_SIZE * rows) / step as f32) as usize;
             let mut distances: Vec<f32> = vec![f32::MAX;  putts];
             
             while y < stop_y {
                 let mut ball: Ball = Ball::new(hole.ball.pos.x, hole.ball.pos.y, hole.ball.radius);
                 ball.hit(x, y);
 
-                loop {
-                    if !ball.is_moving() { break; }
+                while ball.is_moving() {
                     ball.move_ball_and_collide(&walls);
                     if ball.pos.distance(hole.cup.pos) < hole.cup.radius && ball.is_able_to_fall_in_hole() {
-                        distances[i] = 0.0;
+                        ball.pos = hole.cup.pos;
                         break;
                     }
                 }
 
-                if distances[i] != 0.0 { //kind of bad code here, there should be a better way to handle this
-                    distances[i] = ball.pos.distance(hole.cup.pos);
-                }
+                distances[i] = ball.pos.distance(hole.cup.pos);
 
                 x = x + step as f32;
-                if x >= SCREEN_SIZE {
-                    x = x - SCREEN_SIZE;
+                if x >= constants::SCREEN_SIZE {
+                    x = 0.0;
                     y = y + step as f32;
                 }
                 i += 1;
@@ -87,8 +86,7 @@ async fn main() {
     println!("All threads finished");
     println!("Data Points: {}", distances.len());
 
-    request_new_screen_size(SCREEN_SIZE, SCREEN_SIZE);
-    let mut print = true;
+    request_new_screen_size(constants::SCREEN_SIZE, constants::SCREEN_SIZE);
     loop {
         clear_background(BLACK);
         let mut x = 0.0;
@@ -97,22 +95,20 @@ async fn main() {
             if distances[i] == 0.0 {
                 draw_rectangle(x, y, step as f32, step as f32, WHITE);
             }
-            else { // could preCompute colors to save cycles on viewing
+            else { // could pre-compute colors to save cycles on viewing <- Accepting PRs
                 let mut hue: f32 = (distances[i] / FARTHEST_DISTANCE) * MAX_HUE;
                 if hue > MAX_HUE {hue = MAX_HUE;}
                 let rgb = Hsl::from(hue, SATURATION, LIGHTNESS);
-                let color = macroquad::color::Color::new(rgb.get_red() / MAX_RGB_VALUE, rgb.get_green() / MAX_RGB_VALUE, rgb.get_blue() / MAX_RGB_VALUE, 1.0);
+                let color = macroquad::color::Color::new(rgb.get_red() / MAX_RGB_VALUE, rgb.get_green() / MAX_RGB_VALUE, rgb.get_blue() / MAX_RGB_VALUE, ALPHA);
                 draw_rectangle(x, y, step as f32, step as f32, color);
             }
 
-            if print { println!("{} {} {} ", y, x, distances[i]); }
             x = x + step as f32;
-            if x >= SCREEN_SIZE {
+            if x >= constants::SCREEN_SIZE {
                 x = 0.0;
                 y = y + step as f32;
             }
         }
-        print = false;
         next_frame().await
     }
 }

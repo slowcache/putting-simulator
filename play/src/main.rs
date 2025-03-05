@@ -1,5 +1,7 @@
 use macroquad::prelude::*;
+use hole::constants;
 use std::env;
+
 
 #[macroquad::main("Play")]
 async fn main() {
@@ -10,7 +12,7 @@ async fn main() {
     }
     let mut hole = hole::hole::Hole::from_file(args[1].clone());
 
-    request_new_screen_size(600.0, 600.0);
+    request_new_screen_size(constants::SCREEN_SIZE, constants::SCREEN_SIZE);
 
     loop {
         clear_background(DARKGREEN);
@@ -21,10 +23,6 @@ async fn main() {
             if !hole.ball.is_moving() {
                 hole.ball.hit(click_loc.0, click_loc.1);
             }
-        }
-
-        if is_key_pressed(KeyCode::Enter) {
-            hole.ball.hit(85.0, 10.0);
         }
 
         if is_key_pressed(KeyCode::R) {

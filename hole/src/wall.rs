@@ -3,7 +3,7 @@ use macroquad::prelude::Vec2;
 pub const HALF_WALL_THICKNESS: f32 = 2.0;
 pub const WALL_THICKNESS: f32 = 4.0;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct Wall {
     pub top_left: Vec2, // x, y
     pub dimensions: Vec2, // width, height
@@ -13,11 +13,10 @@ pub struct Wall {
     b: Vec2
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub enum WallType {
     HORIZONTAL,
-    VERTICAL,
-    SLANTED
+    VERTICAL
 }
 
 impl Wall {
@@ -27,7 +26,7 @@ impl Wall {
             WallType::HORIZONTAL => {
                 Self {
                     top_left: Vec2::new(top_left.x, top_left.y - HALF_WALL_THICKNESS),
-                    dimensions: Vec2::new(bottom_right.x - top_left.x, HALF_WALL_THICKNESS + HALF_WALL_THICKNESS),
+                    dimensions: Vec2::new(bottom_right.x - top_left.x, WALL_THICKNESS),
                     length: bottom_right.x - top_left.x,
                     wall_type: WallType::HORIZONTAL,
                     a: top_left,
@@ -37,19 +36,9 @@ impl Wall {
             WallType::VERTICAL => {
                 Self {
                     top_left: Vec2::new(top_left.x - HALF_WALL_THICKNESS, top_left.y),
-                    dimensions: Vec2::new(HALF_WALL_THICKNESS + HALF_WALL_THICKNESS, bottom_right.y - top_left.y),
+                    dimensions: Vec2::new(WALL_THICKNESS, bottom_right.y - top_left.y),
                     length: bottom_right.y - top_left.y,
                     wall_type: WallType::VERTICAL,
-                    a: top_left,
-                    b: bottom_right
-                }
-            }
-            WallType::SLANTED => {
-                Self {
-                    top_left: Vec2::new(0.0, 0.0),
-                    dimensions: Vec2::new(0.0, 0.0),
-                    length: 0.0,
-                    wall_type: WallType::SLANTED,
                     a: top_left,
                     b: bottom_right
                 }
@@ -65,9 +54,6 @@ impl Wall {
             }
             WallType::VERTICAL => {
                 p.y > self.a.y - WALL_THICKNESS && p.y < self.b.y + WALL_THICKNESS
-            }
-            WallType::SLANTED => {
-                false
             }
         };
 
@@ -95,9 +81,6 @@ impl Wall {
             WallType::VERTICAL => {
                 return "wall ".to_owned() + &self.top_left.x.to_string() + " " + &self.top_left.y.to_string() + " " + &self.top_left.x.to_string() + " " + &(&self.top_left.y + &self.length).to_string();
             }
-            WallType::SLANTED => {
-                return "".to_string();
-            }
         }
     }
 }
@@ -105,7 +88,5 @@ impl Wall {
 pub fn get_wall_type(top_left: Vec2, bottom_right: Vec2) -> WallType {
     if top_left.x == bottom_right.x { return WallType::VERTICAL; }
     if top_left.y == bottom_right.y { return WallType::HORIZONTAL; }
-    return WallType::SLANTED;
+    return WallType::HORIZONTAL; // Default to horizontal - editor does not allow other wall types anyway
 }
-
-

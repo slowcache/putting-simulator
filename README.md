@@ -14,11 +14,11 @@ This project will let you play a hole that you have created. It accepts a `.hole
 `cargo run -- res/test.hole`
 
 ### Controls
-| Input | Command |
-|-------|---------|
-| Mouse Pointer | Aim Shot |
-| Space | Shoot Ball |
-| R | Reset Ball |
+| Input         | Command    |
+| ------------- | ---------- |
+| Mouse Pointer | Aim Shot   |
+| Space         | Shoot Ball |
+| R             | Reset Ball |
 
 ## Edit
 This project lets you create a `.hole` file. It accepts an optional `.hole` file as the first argument to the program as a starting point.
@@ -29,13 +29,13 @@ This project lets you create a `.hole` file. It accepts an optional `.hole` file
 `cargo run -- res/test.hole`
 
 ### Controls
-| Input | Command |
-|-------|---------|
-| B | Place Ball at Mouse Pointer |
-| C | Place Cup at Mouse Pointer |
-| W | Define the start of a wall at Mouse Pointer |
-| E | Create a wall from location defined by W to Mouse Pointer |
-| S | Save hole into `out.hole` |
+| Input | Command                                        |
+| ----- | ---------------------------------------------- |
+| B     | Place Ball at Mouse Pointer                    |
+| C     | Place Cup at Mouse Pointer                     |
+| W     | Place Wall Anchor at Mouse Pointer             |
+| E     | Create a wall between Anchor and Mouse Pointer |
+| S     | Save hole into `out.hole`                      |
 
 ## Sim
 This project simulates the ball being shot at multiple powers and angles. It accepts 2 arguments. The first argument is how manu pixels apart each shot is. The 2nd argument is a `.hole` file to create the hole from.
